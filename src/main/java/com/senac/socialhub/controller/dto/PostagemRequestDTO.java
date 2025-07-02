@@ -7,13 +7,15 @@ import lombok.Data;
 @Data
 public class PostagemRequestDTO {
 
-    @NotBlank(message = "O titulo é obrigatorio.")
+    @NotBlank(message = "O título é obrigatório.")
     private String titulo;
 
-    @NotBlank(message = "O conteudo é obrigatorio.")
+    @NotBlank(message = "O conteúdo é obrigatório.")
     private String conteudo;
 
-    @NotBlank(message = "O ID da instituição é obrigatório.")
+    @NotNull(message = "O ID da instituição é obrigatório.")
     private Long instituicaoId;
 
+    @NotNull(message = "O ID do usuário é obrigatório.")
+    private Long usuarioId;
 }

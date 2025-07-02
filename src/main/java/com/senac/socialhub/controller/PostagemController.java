@@ -4,7 +4,6 @@ import com.senac.socialhub.controller.dto.PostagemRequestDTO;
 import com.senac.socialhub.controller.dto.PostagemResponseDTO;
 import com.senac.socialhub.entity.Postagem;
 import com.senac.socialhub.service.PostagemService;
-
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,14 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @RestController
 @RequestMapping("/api/postagens")
 public class PostagemController {
 
     private final PostagemService postagemService;
 
-    private PostagemController(PostagemService postagemService) {
+    public PostagemController(PostagemService postagemService) {
         this.postagemService = postagemService;
     }
 
@@ -44,7 +42,6 @@ public class PostagemController {
         return ResponseEntity.ok(toResponseDTO(postagem));
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<PostagemResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid PostagemRequestDTO dto) {
         Postagem atualizado = postagemService.atualizar(id, dto);
@@ -64,8 +61,9 @@ public class PostagemController {
                 p.getConteudo(),
                 p.getDataCriacao(),
                 p.getInstituicao().getId(),
-                p.getInstituicao().getNome()
+                p.getInstituicao().getNome(),
+                p.getUsuario().getId(),
+                p.getUsuario().getNome()
         );
     }
-
 }

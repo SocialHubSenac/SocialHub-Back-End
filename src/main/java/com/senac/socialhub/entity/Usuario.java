@@ -28,4 +28,10 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Column(nullable = true)
+    private String cnpj;
+
+    @Column(nullable = true)
+    private String descricao;
 }
