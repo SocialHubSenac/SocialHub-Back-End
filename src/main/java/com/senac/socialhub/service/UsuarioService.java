@@ -66,16 +66,4 @@ public class UsuarioService {
         usuario.setRole(novaRole);
         usuarioRepository.save(usuario);
     }
-
-    public void bloquearUsuario(Long id) {
-        Usuario usuario = buscarPorId(id);
-        usuario.setAtivo(false);
-        usuarioRepository.save(usuario);
-    }
-
-    public void desbloquearUsuario(Long id) {
-        Usuario usuario = buscarPorId(id);
-        usuario.setAtivo(true);
-        usuarioRepository.save(usuario);
-    }
 }

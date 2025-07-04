@@ -35,9 +35,6 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = false)
-    private boolean ativo = true;
-
     // ========= Métodos obrigatórios do Spring Security ==========
 
     @Override
@@ -53,25 +50,5 @@ public class Usuario implements UserDetails {
     @Override
     public String getPassword() {
         return this.senha;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true; // você pode futuramente personalizar
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true; // personalizável também
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true; // idem
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.ativo; // se false, login será negado
     }
 }

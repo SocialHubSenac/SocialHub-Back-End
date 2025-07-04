@@ -36,16 +36,4 @@ public class AdminController {
         usuarioService.alterarRole(id, Role.valueOf(novaRole));
         return ResponseEntity.noContent().build();
     }
-
-    @PutMapping("/{id}/bloquear")
-    public ResponseEntity<Void> bloquear(@PathVariable Long id) {
-        usuarioService.bloquearUsuario(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}/desbloquear")
-    public ResponseEntity<Void> desbloquear(@PathVariable Long id) {
-        usuarioService.desbloquearUsuario(id);
-        return ResponseEntity.noContent().build();
-    }
 }
