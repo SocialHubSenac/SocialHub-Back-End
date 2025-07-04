@@ -106,4 +106,12 @@ public class UsuarioService {
 
         usuarioRepository.delete(u);
     }
+
+    //PARTE DO PAINEL ADMIN
+
+    public void alterarRole(Long id, Role novaRole) {
+        Usuario usuario = buscarPorId(id);
+        usuario.setRole(novaRole);
+        usuarioRepository.save(usuario);
+    }
 }

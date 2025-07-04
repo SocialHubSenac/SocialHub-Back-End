@@ -25,8 +25,6 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(dadosLogin.getEmail(), dadosLogin.getSenha())
         );
 
-        String token = tokenService.gerarToken(authentication.getName());
-
-        return token;
+        return tokenService.gerarToken(authentication.getName());
     }
 }
