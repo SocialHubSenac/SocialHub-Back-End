@@ -2,29 +2,26 @@ package com.senac.socialhub.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "ongs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Postagem {
+public class Ong {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String titulo;
-    private String conteudo;
+    @Column(nullable = false, unique = true)
+    private String cnpj;
 
-    private LocalDateTime dataCriacao;
+    @Column(nullable = false)
+    private String descricao;
 
-    @ManyToOne
-    @JoinColumn(name = "instituicao_id", nullable = false)
-    private Instituicao instituicao;
-
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 }

@@ -15,4 +15,6 @@ public class PostagemResponseDTO {
     private LocalDateTime dataCriacao;
     private Long instituicaoId;
     private String instituicaoNome;
+    private Long usuarioId;
+    private String usuarioNome;
 }

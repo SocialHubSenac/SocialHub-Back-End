@@ -10,4 +10,10 @@ public class UsuarioResponseDTO {
     private String nome;
     private String email;
     private String tipo;
+
+    private String cnpj;
+    private String descricao;
+
+    public UsuarioResponseDTO(Long id, String nome, String email, String name) {
+    }
 }
