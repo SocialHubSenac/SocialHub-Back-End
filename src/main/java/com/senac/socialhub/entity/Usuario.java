@@ -35,9 +35,9 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = true)
-    private String cnpj;
+    // ========= Métodos obrigatórios do Spring Security ==========
 
+<<<<<<< HEAD
     @Column(nullable = true)
     private String descricao;
 
@@ -49,10 +49,16 @@ public class Usuario implements UserDetails {
     @Override
     public String getPassword() {
         return senha;
+=======
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+>>>>>>> 79e49255acb80c92c17035389f12ca62d88dd765
     }
 
     @Override
     public String getUsername() {
+<<<<<<< HEAD
         return email;
     }
 
@@ -76,3 +82,13 @@ public class Usuario implements UserDetails {
         return true;
     }
 }
+=======
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.senha;
+    }
+}
+>>>>>>> 79e49255acb80c92c17035389f12ca62d88dd765
