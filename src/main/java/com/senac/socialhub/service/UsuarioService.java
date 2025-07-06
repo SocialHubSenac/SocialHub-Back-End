@@ -30,12 +30,14 @@ public class UsuarioService {
 
     @Transactional
     public Usuario salvar(UsuarioRequestDTO dto) {
+        // Validação de email duplicado
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new ValidacaoException("Já existe um usuário com este email.");
         }
 
         boolean isOng = "ONG".equalsIgnoreCase(dto.getTipo());
 
+        // Validações específicas para ONG
         if (isOng) {
             if (dto.getCnpj() == null || dto.getCnpj().trim().isEmpty()) {
                 throw new ValidacaoException("CNPJ é obrigatório para ONG.");
@@ -48,6 +50,7 @@ public class UsuarioService {
             }
         }
 
+        // Criação do usuário
         Usuario novoUsuario = Usuario.builder()
                 .nome(dto.getNome())
                 .email(dto.getEmail())
@@ -57,6 +60,7 @@ public class UsuarioService {
 
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
 
+        // Criação da ONG se necessário
         if (isOng) {
             Ong ong = Ong.builder()
                     .cnpj(dto.getCnpj().trim())
@@ -78,10 +82,16 @@ public class UsuarioService {
                 .orElseThrow(() -> new ValidacaoException("Usuário não encontrado"));
     }
 
+    public Usuario buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ValidacaoException("Usuário não encontrado"));
+    }
+
     @Transactional
     public Usuario atualizar(Long id, UsuarioRequestDTO dto) {
         Usuario existente = buscarPorId(id);
 
+        // Mapeamento correto do tipo para Role
         Role novaRole;
         if ("ONG".equalsIgnoreCase(dto.getTipo())) {
             novaRole = Role.ADMIN;

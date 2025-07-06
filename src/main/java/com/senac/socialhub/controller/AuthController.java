@@ -11,13 +11,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
@@ -34,8 +37,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> autenticar(@RequestBody CredenciaisLogin dadosLogin) {
+    public ResponseEntity<?> autenticar(@Valid @RequestBody CredenciaisLogin dadosLogin,
+                                        BindingResult result) {
         try {
+            // Verificar erros de validação
+            if (result.hasErrors()) {
+                Map<String, String> errors = result.getFieldErrors()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                error -> error.getField(),
+                                error -> error.getDefaultMessage()
+                        ));
+                return ResponseEntity.badRequest().body(errors);
+            }
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dadosLogin.getEmail(), dadosLogin.getSenha())
             );
@@ -66,8 +81,29 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registrar(@RequestBody UsuarioRequestDTO dadosUsuario) {
+    public ResponseEntity<?> registrar(@Valid @RequestBody UsuarioRequestDTO dadosUsuario,
+                                       BindingResult result) {
         try {
+            // Log para debug
+            System.out.println("=== DEBUG REGISTER ===");
+            System.out.println("Dados recebidos: " + dadosUsuario);
+
+            // Verificar erros de validação do Bean Validation
+            if (result.hasErrors()) {
+                System.out.println("Erros de validação encontrados:");
+                result.getFieldErrors().forEach(error ->
+                        System.out.println("Campo: " + error.getField() + " - Erro: " + error.getDefaultMessage())
+                );
+
+                Map<String, String> errors = result.getFieldErrors()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                error -> error.getField(),
+                                error -> error.getDefaultMessage()
+                        ));
+                return ResponseEntity.badRequest().body(errors);
+            }
+
             Usuario novoUsuario = usuarioService.salvar(dadosUsuario);
 
             Map<String, Object> response = new HashMap<>();
@@ -75,15 +111,52 @@ public class AuthController {
             response.put("id", novoUsuario.getId());
             response.put("nome", novoUsuario.getNome());
             response.put("email", novoUsuario.getEmail());
+            response.put("role", novoUsuario.getRole());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (ValidacaoException e) {
+            System.err.println("Erro de validação: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
         } catch (Exception e) {
+            System.err.println("Erro interno no registro:");
+            e.printStackTrace();
+
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Erro interno do servidor: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> obterPerfilUsuario(Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Usuário não autenticado");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+            }
+
+            String email = authentication.getName();
+            // Aqui você precisa buscar o usuário pelo email
+            // Vou assumir que você tem um método no service para isso
+            Usuario usuario = usuarioService.buscarPorEmail(email);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", usuario.getId());
+            response.put("nome", usuario.getNome());
+            response.put("email", usuario.getEmail());
+            response.put("role", usuario.getRole());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar perfil do usuário:");
+            e.printStackTrace();
+
             Map<String, String> error = new HashMap<>();
             error.put("message", "Erro interno do servidor: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
