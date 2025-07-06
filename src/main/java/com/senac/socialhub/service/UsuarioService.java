@@ -34,14 +34,16 @@ public class UsuarioService {
             throw new ValidacaoException("Já existe um usuário com este email.");
         }
 
-        if ("ONG".equalsIgnoreCase(dto.getTipo())) {
-            if (dto.getCnpj() == null || dto.getCnpj().isEmpty()) {
+        boolean isOng = "ONG".equalsIgnoreCase(dto.getTipo());
+
+        if (isOng) {
+            if (dto.getCnpj() == null || dto.getCnpj().trim().isEmpty()) {
                 throw new ValidacaoException("CNPJ é obrigatório para ONG.");
             }
-            if (ongRepository.existsByCnpj(dto.getCnpj())) {
+            if (ongRepository.existsByCnpj(dto.getCnpj().trim())) {
                 throw new ValidacaoException("Já existe uma ONG cadastrada com este CNPJ.");
             }
-            if (dto.getDescricao() == null || dto.getDescricao().isEmpty()) {
+            if (dto.getDescricao() == null || dto.getDescricao().trim().isEmpty()) {
                 throw new ValidacaoException("Descrição é obrigatória para ONG.");
             }
         }
@@ -50,15 +52,15 @@ public class UsuarioService {
                 .nome(dto.getNome())
                 .email(dto.getEmail())
                 .senha(passwordEncoder.encode(dto.getSenha()))
-                .role("ONG".equalsIgnoreCase(dto.getTipo()) ? Role.ADMIN : Role.USER)
+                .role(isOng ? Role.ADMIN : Role.USER)
                 .build();
 
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
 
-        if ("ONG".equalsIgnoreCase(dto.getTipo())) {
+        if (isOng) {
             Ong ong = Ong.builder()
-                    .cnpj(dto.getCnpj())
-                    .descricao(dto.getDescricao())
+                    .cnpj(dto.getCnpj().trim())
+                    .descricao(dto.getDescricao().trim())
                     .usuario(usuarioSalvo)
                     .build();
             ongRepository.save(ong);
@@ -79,10 +81,20 @@ public class UsuarioService {
     @Transactional
     public Usuario atualizar(Long id, UsuarioRequestDTO dto) {
         Usuario existente = buscarPorId(id);
+
+        Role novaRole;
+        if ("ONG".equalsIgnoreCase(dto.getTipo())) {
+            novaRole = Role.ADMIN;
+        } else if ("USER".equalsIgnoreCase(dto.getTipo())) {
+            novaRole = Role.USER;
+        } else {
+            throw new ValidacaoException("Tipo de usuário inválido: " + dto.getTipo());
+        }
+
         existente.setNome(dto.getNome());
         existente.setEmail(dto.getEmail());
         existente.setSenha(passwordEncoder.encode(dto.getSenha()));
-        existente.setRole(Role.valueOf(dto.getTipo()));
+        existente.setRole(novaRole);
 
         if ("ONG".equalsIgnoreCase(dto.getTipo())) {
             Ong ong = ongRepository.findByUsuario_Id(id)
@@ -99,7 +111,6 @@ public class UsuarioService {
     public void excluir(Long id) {
         Usuario u = buscarPorId(id);
 
-
         if (u.getRole() == Role.ADMIN) {
             ongRepository.findByUsuario_Id(id).ifPresent(ongRepository::delete);
         }
@@ -108,7 +119,6 @@ public class UsuarioService {
     }
 
     //PARTE DO PAINEL ADMIN
-
     public void alterarRole(Long id, Role novaRole) {
         Usuario usuario = buscarPorId(id);
         usuario.setRole(novaRole);
