@@ -21,12 +21,8 @@ public class TokenService {
     public String gerarToken(String emailUsuario) {
         return Jwts.builder()
                 .setSubject(emailUsuario)
-<<<<<<< HEAD
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiracao))
-=======
-                .setExpiration(this.getExpirationDate())
->>>>>>> 79e49255acb80c92c17035389f12ca62d88dd765
+                .setExpiration(getExpirationDate())
                 .signWith(SignatureAlgorithm.HS512, segredo)
                 .compact();
     }
@@ -47,17 +43,11 @@ public class TokenService {
                 .getBody()
                 .getSubject();
     }
-<<<<<<< HEAD
-}
-=======
 
     private Date getExpirationDate() {
         Instant instant = LocalDateTime.now()
                 .plusMinutes(expiracao)
                 .toInstant(ZoneOffset.of("-03:00"));
-
         return Date.from(instant);
     }
-
 }
->>>>>>> 79e49255acb80c92c17035389f12ca62d88dd765
