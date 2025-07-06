@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/postagens")
+@CrossOrigin(origins = "http://localhost:3000") // Permitir requisições do frontend
 public class PostagemController {
 
     private final PostagemService postagemService;
@@ -30,6 +31,51 @@ public class PostagemController {
     @GetMapping
     public ResponseEntity<List<PostagemResponseDTO>> listar() {
         List<Postagem> postagens = postagemService.listar();
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/home")
+    public ResponseEntity<List<PostagemResponseDTO>> listarParaHome() {
+        List<Postagem> postagens = postagemService.listarParaHome();
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/instituicao/{instituicaoId}")
+    public ResponseEntity<List<PostagemResponseDTO>> listarPorInstituicao(@PathVariable Long instituicaoId) {
+        List<Postagem> postagens = postagemService.listarPorInstituicao(instituicaoId);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<PostagemResponseDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
+        List<Postagem> postagens = postagemService.listarPorUsuario(usuarioId);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/buscar/titulo")
+    public ResponseEntity<List<PostagemResponseDTO>> buscarPorTitulo(@RequestParam String titulo) {
+        List<Postagem> postagens = postagemService.buscarPorTitulo(titulo);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @GetMapping("/buscar/conteudo")
+    public ResponseEntity<List<PostagemResponseDTO>> buscarPorConteudo(@RequestParam String conteudo) {
+        List<Postagem> postagens = postagemService.buscarPorConteudo(conteudo);
         List<PostagemResponseDTO> resposta = postagens.stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());

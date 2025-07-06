@@ -13,11 +13,12 @@ public class TokenService {
     private String segredo;
 
     @Value("${jwt.expiration}")
-    private String expiracao;
+    private Long expiracao;
 
     public String gerarToken(String emailUsuario) {
         return Jwts.builder()
                 .setSubject(emailUsuario)
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiracao))
                 .signWith(SignatureAlgorithm.HS512, segredo)
                 .compact();
@@ -39,5 +40,4 @@ public class TokenService {
                 .getBody()
                 .getSubject();
     }
-
 }

@@ -9,6 +9,7 @@ import com.senac.socialhub.repository.InstituicaoRepository;
 import com.senac.socialhub.repository.PostagemRepository;
 import com.senac.socialhub.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,7 @@ public class PostagemService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public Postagem salvar(PostagemRequestDTO dto) {
         Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instituição não encontrada."));
@@ -47,7 +49,27 @@ public class PostagemService {
     }
 
     public List<Postagem> listar() {
-        return postagemRepository.findAll();
+        return postagemRepository.findAllByOrderByDataCriacaoDesc();
+    }
+
+    public List<Postagem> listarParaHome() {
+        return postagemRepository.findTop10ByOrderByDataCriacaoDesc();
+    }
+
+    public List<Postagem> listarPorInstituicao(Long instituicaoId) {
+        return postagemRepository.findByInstituicaoIdOrderByDataCriacaoDesc(instituicaoId);
+    }
+
+    public List<Postagem> listarPorUsuario(Long usuarioId) {
+        return postagemRepository.findByUsuarioIdOrderByDataCriacaoDesc(usuarioId);
+    }
+
+    public List<Postagem> buscarPorTitulo(String titulo) {
+        return postagemRepository.findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(titulo);
+    }
+
+    public List<Postagem> buscarPorConteudo(String conteudo) {
+        return postagemRepository.findByConteudoContainingIgnoreCaseOrderByDataCriacaoDesc(conteudo);
     }
 
     public Postagem buscarPorId(Long id) {
@@ -55,14 +77,23 @@ public class PostagemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Postagem não encontrada."));
     }
 
+    @Transactional
     public Postagem atualizar(Long id, PostagemRequestDTO dto) {
         Postagem existente = buscarPorId(id);
+
+        if (!existente.getInstituicao().getId().equals(dto.getInstituicaoId())) {
+            Instituicao novaInstituicao = instituicaoRepository.findById(dto.getInstituicaoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Instituição não encontrada."));
+            existente.setInstituicao(novaInstituicao);
+        }
+
         existente.setTitulo(dto.getTitulo());
         existente.setConteudo(dto.getConteudo());
 
         return postagemRepository.save(existente);
     }
 
+    @Transactional
     public void excluir(Long id) {
         Postagem postagem = buscarPorId(id);
         postagemRepository.delete(postagem);
