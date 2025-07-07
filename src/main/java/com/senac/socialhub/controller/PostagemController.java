@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/postagens")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}) // Suporte para ambos os frontends
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class PostagemController {
 
     private final PostagemService postagemService;
@@ -24,130 +24,80 @@ public class PostagemController {
 
     @PostMapping
     public ResponseEntity<PostagemResponseDTO> criar(@RequestBody @Valid PostagemRequestDTO dto) {
-        try {
-            Postagem nova = postagemService.salvar(dto);
-            return ResponseEntity.ok(toResponseDTO(nova));
-        } catch (Exception e) {
-            System.err.println("Erro ao criar postagem: " + e.getMessage());
-            throw e; // Re-lança para o GlobalExceptionHandler capturar
-        }
+        Postagem nova = postagemService.salvar(dto);
+        return ResponseEntity.ok(toResponseDTO(nova));
     }
 
     @GetMapping
     public ResponseEntity<List<PostagemResponseDTO>> listar() {
-        try {
-            List<Postagem> postagens = postagemService.listar();
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao listar postagens: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.listar();
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/home")
     public ResponseEntity<List<PostagemResponseDTO>> listarParaHome() {
-        try {
-            List<Postagem> postagens = postagemService.listarParaHome();
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao listar postagens para home: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.listarParaHome();
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/instituicao/{instituicaoId}")
     public ResponseEntity<List<PostagemResponseDTO>> listarPorInstituicao(@PathVariable Long instituicaoId) {
-        try {
-            List<Postagem> postagens = postagemService.listarPorInstituicao(instituicaoId);
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao listar postagens por instituição: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.listarPorInstituicao(instituicaoId);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<PostagemResponseDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
-        try {
-            List<Postagem> postagens = postagemService.listarPorUsuario(usuarioId);
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao listar postagens por usuário: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.listarPorUsuario(usuarioId);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/buscar/titulo")
     public ResponseEntity<List<PostagemResponseDTO>> buscarPorTitulo(@RequestParam String titulo) {
-        try {
-            List<Postagem> postagens = postagemService.buscarPorTitulo(titulo);
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar postagens por título: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.buscarPorTitulo(titulo);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/buscar/conteudo")
     public ResponseEntity<List<PostagemResponseDTO>> buscarPorConteudo(@RequestParam String conteudo) {
-        try {
-            List<Postagem> postagens = postagemService.buscarPorConteudo(conteudo);
-            List<PostagemResponseDTO> resposta = postagens.stream()
-                    .map(this::toResponseDTO)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(resposta);
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar postagens por conteúdo: " + e.getMessage());
-            throw e;
-        }
+        List<Postagem> postagens = postagemService.buscarPorConteudo(conteudo);
+        List<PostagemResponseDTO> resposta = postagens.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PostagemResponseDTO> buscarPorId(@PathVariable Long id) {
-        try {
-            Postagem postagem = postagemService.buscarPorId(id);
-            return ResponseEntity.ok(toResponseDTO(postagem));
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar postagem por ID: " + e.getMessage());
-            throw e;
-        }
+        Postagem postagem = postagemService.buscarPorId(id);
+        return ResponseEntity.ok(toResponseDTO(postagem));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostagemResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid PostagemRequestDTO dto) {
-        try {
-            Postagem atualizado = postagemService.atualizar(id, dto);
-            return ResponseEntity.ok(toResponseDTO(atualizado));
-        } catch (Exception e) {
-            System.err.println("Erro ao atualizar postagem: " + e.getMessage());
-            throw e;
-        }
+        Postagem atualizado = postagemService.atualizar(id, dto);
+        return ResponseEntity.ok(toResponseDTO(atualizado));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        try {
-            postagemService.excluir(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            System.err.println("Erro ao excluir postagem: " + e.getMessage());
-            throw e;
-        }
+        postagemService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 
     private PostagemResponseDTO toResponseDTO(Postagem p) {

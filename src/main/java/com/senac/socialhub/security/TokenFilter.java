@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,25 +25,26 @@ public class TokenFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            if (tokenService.tokenValido(token)) {
-                String email = tokenService.pegarEmailUsuario(token);
-                UserDetails usuario = usuarioAutenticadoService.loadUserByUsername(email);
+            try {
+                if (tokenService.tokenValido(token)) {
+                    String email = tokenService.pegarEmailUsuario(token);
+                    UserDetails usuario = usuarioAutenticadoService.loadUserByUsername(email);
 
-                UsernamePasswordAuthenticationToken autenticacao = new UsernamePasswordAuthenticationToken(
-                        usuario, null, usuario.getAuthorities());
-
-                autenticacao.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(autenticacao);
+                    UsernamePasswordAuthenticationToken autenticacao = new UsernamePasswordAuthenticationToken(
+                            usuario, null, usuario.getAuthorities());
+                    autenticacao.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(autenticacao);
+                }
+            } catch (Exception e) {
+                // Log do erro, mas não interrompe o filtro para não causar erro 500
+                System.err.println("Token inválido ou erro na autenticação: " + e.getMessage());
             }
         }
 

@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,8 +31,11 @@ public class UsuarioService {
 
     @Transactional
     public Usuario salvar(UsuarioRequestDTO dto) {
+        // Normalizar email antes de validar
+        String emailNormalizado = dto.getEmail().toLowerCase().trim();
+
         // Validação de email duplicado
-        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (usuarioRepository.findByEmail(emailNormalizado).isPresent()) {
             throw new ValidacaoException("Já existe um usuário com este email.");
         }
 
@@ -53,9 +57,11 @@ public class UsuarioService {
         // Criação do usuário
         Usuario novoUsuario = Usuario.builder()
                 .nome(dto.getNome())
-                .email(dto.getEmail())
+                .email(emailNormalizado)
                 .senha(passwordEncoder.encode(dto.getSenha()))
                 .role(isOng ? Role.ADMIN : Role.USER)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
@@ -83,7 +89,9 @@ public class UsuarioService {
     }
 
     public Usuario buscarPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
+        // Normalizar email antes de buscar
+        String emailNormalizado = email.toLowerCase().trim();
+        return usuarioRepository.findByEmail(emailNormalizado)
                 .orElseThrow(() -> new ValidacaoException("Usuário não encontrado"));
     }
 
@@ -102,9 +110,10 @@ public class UsuarioService {
         }
 
         existente.setNome(dto.getNome());
-        existente.setEmail(dto.getEmail());
+        existente.setEmail(dto.getEmail().toLowerCase().trim());
         existente.setSenha(passwordEncoder.encode(dto.getSenha()));
         existente.setRole(novaRole);
+        existente.setUpdatedAt(LocalDateTime.now());
 
         if ("ONG".equalsIgnoreCase(dto.getTipo())) {
             Ong ong = ongRepository.findByUsuario_Id(id)
@@ -128,10 +137,32 @@ public class UsuarioService {
         usuarioRepository.delete(u);
     }
 
-    //PARTE DO PAINEL ADMIN
+    // PARTE DO PAINEL ADMIN
     public void alterarRole(Long id, Role novaRole) {
         Usuario usuario = buscarPorId(id);
         usuario.setRole(novaRole);
+        usuario.setUpdatedAt(LocalDateTime.now());
         usuarioRepository.save(usuario);
+    }
+
+    // === MÉTODOS PARA RESET DE SENHA SIMPLIFICADO ===
+
+    /**
+     * Atualiza apenas a senha do usuário
+     */
+    @Transactional
+    public void atualizarSenha(Long id, String novaSenhaHasheada) {
+        Usuario usuario = buscarPorId(id);
+        usuario.setSenha(novaSenhaHasheada);
+        usuario.setUpdatedAt(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Método auxiliar para verificar se um email existe no sistema
+     */
+    public boolean emailExiste(String email) {
+        String emailNormalizado = email.toLowerCase().trim();
+        return usuarioRepository.findByEmail(emailNormalizado).isPresent();
     }
 }

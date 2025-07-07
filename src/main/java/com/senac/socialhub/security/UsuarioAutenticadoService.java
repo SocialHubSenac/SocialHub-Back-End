@@ -1,7 +1,7 @@
 package com.senac.socialhub.security;
 
-import com.senac.socialhub.repository.UsuarioRepository;
 import com.senac.socialhub.entity.Usuario;
+import com.senac.socialhub.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 

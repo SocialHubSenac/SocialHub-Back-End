@@ -1,5 +1,6 @@
 package com.senac.socialhub.security;
 
+import com.senac.socialhub.entity.Usuario;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class TokenService {
@@ -16,11 +19,18 @@ public class TokenService {
     private String segredo;
 
     @Value("${jwt.expiration}")
-    private Long expiracao;
+    private Long expiracao; // em minutos
 
-    public String gerarToken(String emailUsuario) {
+    public String gerarToken(Usuario usuario) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", usuario.getId());
+        claims.put("nome", usuario.getNome());
+        claims.put("instituicaoId", null); // Ajuste conforme sua entidade
+        claims.put("role", usuario.getRole().name());
+
         return Jwts.builder()
-                .setSubject(emailUsuario)
+                .setClaims(claims)
+                .setSubject(usuario.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(getExpirationDate())
                 .signWith(SignatureAlgorithm.HS512, segredo)
@@ -42,6 +52,13 @@ public class TokenService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(segredo)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     private Date getExpirationDate() {
