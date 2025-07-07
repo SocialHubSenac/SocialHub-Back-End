@@ -31,17 +31,14 @@ public class UsuarioService {
 
     @Transactional
     public Usuario salvar(UsuarioRequestDTO dto) {
-        // Normalizar email antes de validar
         String emailNormalizado = dto.getEmail().toLowerCase().trim();
 
-        // Validação de email duplicado
         if (usuarioRepository.findByEmail(emailNormalizado).isPresent()) {
             throw new ValidacaoException("Já existe um usuário com este email.");
         }
 
         boolean isOng = "ONG".equalsIgnoreCase(dto.getTipo());
 
-        // Validações específicas para ONG
         if (isOng) {
             if (dto.getCnpj() == null || dto.getCnpj().trim().isEmpty()) {
                 throw new ValidacaoException("CNPJ é obrigatório para ONG.");
@@ -54,7 +51,6 @@ public class UsuarioService {
             }
         }
 
-        // Criação do usuário
         Usuario novoUsuario = Usuario.builder()
                 .nome(dto.getNome())
                 .email(emailNormalizado)
@@ -66,7 +62,6 @@ public class UsuarioService {
 
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
 
-        // Criação da ONG se necessário
         if (isOng) {
             Ong ong = Ong.builder()
                     .cnpj(dto.getCnpj().trim())
@@ -89,7 +84,6 @@ public class UsuarioService {
     }
 
     public Usuario buscarPorEmail(String email) {
-        // Normalizar email antes de buscar
         String emailNormalizado = email.toLowerCase().trim();
         return usuarioRepository.findByEmail(emailNormalizado)
                 .orElseThrow(() -> new ValidacaoException("Usuário não encontrado"));
@@ -145,11 +139,6 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    // === MÉTODOS PARA RESET DE SENHA SIMPLIFICADO ===
-
-    /**
-     * Atualiza apenas a senha do usuário
-     */
     @Transactional
     public void atualizarSenha(Long id, String novaSenhaHasheada) {
         Usuario usuario = buscarPorId(id);
@@ -158,9 +147,6 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    /**
-     * Método auxiliar para verificar se um email existe no sistema
-     */
     public boolean emailExiste(String email) {
         String emailNormalizado = email.toLowerCase().trim();
         return usuarioRepository.findByEmail(emailNormalizado).isPresent();

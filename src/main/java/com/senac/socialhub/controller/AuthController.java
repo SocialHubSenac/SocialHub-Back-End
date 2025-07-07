@@ -54,7 +54,6 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            // Normalizar email para lowercase
             String emailNormalizado = dadosLogin.getEmail().toLowerCase().trim();
 
             Authentication authentication = authenticationManager.authenticate(
@@ -62,7 +61,6 @@ public class AuthController {
             );
 
             Usuario usuario = usuarioService.buscarPorEmail(emailNormalizado);
-
             String token = tokenService.gerarToken(usuario);
 
             Map<String, Object> response = new HashMap<>();
@@ -102,7 +100,6 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            // Normalizar email antes de salvar
             if (dadosUsuario.getEmail() != null) {
                 dadosUsuario.setEmail(dadosUsuario.getEmail().toLowerCase().trim());
             }
@@ -147,6 +144,7 @@ public class AuthController {
             response.put("nome", usuario.getNome());
             response.put("email", usuario.getEmail());
             response.put("role", usuario.getRole());
+            response.put("createdAt", usuario.getCreatedAt()); // ✅ CAMPO ADICIONADO
 
             return ResponseEntity.ok(response);
 
@@ -157,18 +155,12 @@ public class AuthController {
         }
     }
 
-    // === ENDPOINT SIMPLIFICADO PARA RESET DE SENHA ===
-
-    /**
-     * Verifica se o email existe e permite redefinir a senha diretamente
-     */
     @PostMapping("/reset-password")
     public ResponseEntity<?> redefinirSenha(@RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
             String novaSenha = request.get("novaSenha");
 
-            // Validações
             if (email == null || email.trim().isEmpty()) {
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "Email é obrigatório");
@@ -181,10 +173,8 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // Normalizar email
             String emailNormalizado = email.toLowerCase().trim();
 
-            // Verificar se o email existe
             if (!usuarioService.emailExiste(emailNormalizado)) {
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "Email não encontrado");
@@ -192,11 +182,7 @@ public class AuthController {
             }
 
             Usuario usuario = usuarioService.buscarPorEmail(emailNormalizado);
-
-            // Criptografar nova senha
             String senhaHasheada = passwordEncoder.encode(novaSenha);
-
-            // Atualizar senha do usuário
             usuarioService.atualizarSenha(usuario.getId(), senhaHasheada);
 
             Map<String, Object> response = new HashMap<>();
@@ -217,9 +203,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Endpoint para verificar se um email existe no sistema
-     */
     @GetMapping("/check-email")
     public ResponseEntity<?> verificarEmail(@RequestParam String email) {
         try {
@@ -229,9 +212,7 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // Normalizar email
             String emailNormalizado = email.toLowerCase().trim();
-
             boolean emailExiste = usuarioService.emailExiste(emailNormalizado);
 
             Map<String, Object> response = new HashMap<>();

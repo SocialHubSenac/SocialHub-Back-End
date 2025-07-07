@@ -43,7 +43,6 @@ public class TokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(autenticacao);
                 }
             } catch (Exception e) {
-                // Log do erro, mas não interrompe o filtro para não causar erro 500
                 System.err.println("Token inválido ou erro na autenticação: " + e.getMessage());
             }
         }
